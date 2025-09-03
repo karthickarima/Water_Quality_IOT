@@ -7,18 +7,19 @@ function startConnect() {
     return;
   }
 
-  const host = document.getElementById("host").value;
-  const port = Number(document.getElementById("port").value);
+  const host = document.getElementById("host").value;   // test.mosquitto.org
+  const port = Number(document.getElementById("port").value); // 8081
   const clientId = "clientId-" + Math.random().toString(16).substr(2, 8);
 
   console.log(`Connecting to wss://${host}:${port}/mqtt as ${clientId}`);
+  // ✅ Use the 4-argument constructor with "/mqtt"
   client = new Paho.MQTT.Client(host, port, "/mqtt", clientId);
 
   client.onConnectionLost = onConnectionLost;
   client.onMessageArrived = onMessageArrived;
 
   client.connect({
-    useSSL: true,
+    useSSL: true, // ✅ force secure WebSocket
     onSuccess: onConnect,
     onFailure: function (err) {
       console.error("❌ Connection failed:", err.errorMessage);
@@ -30,6 +31,8 @@ function startConnect() {
 function onConnect() {
   console.log("✅ Connected");
   updateStatus("🟢 Connected", true);
+
+  // ✅ Subscribe to all water topics
   client.subscribe("water/#");
 }
 
