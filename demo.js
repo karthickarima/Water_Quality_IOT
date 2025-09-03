@@ -11,14 +11,14 @@ function startConnect() {
   const port = Number(document.getElementById("port").value);
   const clientId = "clientId-" + Math.random().toString(16).substr(2, 8);
 
-  console.log(`Connecting to ${host}:${port} as ${clientId}`);
-  client = new Paho.MQTT.Client(host, port, clientId);
+  console.log(`Connecting to wss://${host}:${port}/mqtt as ${clientId}`);
+  client = new Paho.MQTT.Client(host, port, "/mqtt", clientId);
 
   client.onConnectionLost = onConnectionLost;
   client.onMessageArrived = onMessageArrived;
 
   client.connect({
-    useSSL: (port === 8081), // only use SSL if port is 8081
+    useSSL: true,
     onSuccess: onConnect,
     onFailure: function (err) {
       console.error("❌ Connection failed:", err.errorMessage);
