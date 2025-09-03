@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Water Quality Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:,"> <!-- prevent favicon error -->
+</head>
+<body>
+  <h2>🌊 Water Quality Dashboard</h2>
+
+  <!-- Connection form -->
+  <div class="connect-box">
+    <label>Host:</label>
+    <input id="host" type="text" value="test.mosquitto.org">
+    <label>Port:</label>
+    <input id="port" type="number" value="8080">
+    <button onclick="startConnect()">Connect</button>
+    <button onclick="startDisconnect()">Disconnect</button>
+  </div>
+
+  <div id="status" class="status disconnected">🔴 Disconnected</div>
+
+  <div class="sensor"><span class="label">pH:</span> <span id="ph" class="value">--</span></div>
+  <div class="sensor"><span class="label">Turbidity:</span> <span id="turbidity" class="value">--</span></div>
+  <div class="sensor"><span class="label">Ammonia:</span> <span id="ammonia" class="value">--</span></div>
+  <div class="sensor"><span class="label">TDS (ppm):</span> <span id="tds" class="value">--</span></div>
+  <div class="sensor"><span class="label">Water Level:</span> <span id="level" class="value">--</span></div>
+
+  <!-- ✅ Load working Paho MQTT library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.2/mqttws31.min.js"></script>
+  <!-- ✅ Then load your custom code -->
+  <script src="demo.js"></script>
+</body>
+</html>
