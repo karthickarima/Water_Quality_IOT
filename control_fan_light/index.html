@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Relay Control</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h2>🔌 MQTT Relay Control</h2>
+
+<div class="connect-box">
+  <label>Host:</label>
+  <input id="host" value="test.mosquitto.org">
+
+  <label>Port:</label>
+  <input id="port" type="number" value="8081">
+
+  <br>
+  <button onclick="manualConnect()">Connect</button>
+  <button onclick="manualDisconnect()">Disconnect</button>
+</div>
+
+<div id="status" class="status disconnected">🔴 Disconnected</div>
+
+<div class="relay-container">
+  <div class="relay-card">
+    <h3>Relay 1</h3>
+    <button class="on" onclick="controlRelay('rly_1',1)">ON</button>
+    <button class="off" onclick="controlRelay('rly_1',0)">OFF</button>
+  </div>
+
+  <div class="relay-card">
+    <h3>Relay 2</h3>
+    <button class="on" onclick="controlRelay('rly_2',1)">ON</button>
+    <button class="off" onclick="controlRelay('rly_2',0)">OFF</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.2/mqttws31.min.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
