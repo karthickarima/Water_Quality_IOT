@@ -1,26 +1,34 @@
-let client = null;
+var client;
 let reconnectTimer = null;
 let isManuallyDisconnected = false;
 
-// AUTO CONNECT
 window.onload = () => {
   connectMQTT();
 };
 
 function connectMQTT() {
-  let host = document.getElementById("host").value;
-  let port = Number(document.getElementById("port").value);
+  if (typeof Paho === "undefined" || !Paho.MQTT) {
+    console.error("❌ MQTT library not loaded!");
+    updateStatus("❌ MQTT library missing", false);
+    return;
+  }
 
-  updateStatus("connecting");
-  let clientId = "web_" + Math.floor(Math.random() * 1000);
+  const host = document.getElementById("host").value;
+  const port = Number(document.getElementById("port").value);
+  const clientId = "clientId-" + Math.random().toString(16).substr(2, 8);
+
+  // Clean old connection
+  if (client && client.isConnected()) {
+    client.disconnect();
+  }
+
   client = new Paho.MQTT.Client(host, port, "/mqtt", clientId);
 
-
-  client.onConnectionLost = function () {
-    console.log("❌ Connection lost");
+  client.onConnectionLost = function (response) {
+    console.log("❌ Connection lost:", response.errorMessage);
 
     if (!isManuallyDisconnected) {
-      updateStatus("reconnecting");
+      updateStatus("🟠 Reconnecting...", false);
 
       reconnectTimer = setTimeout(() => {
         connectMQTT();
@@ -29,17 +37,17 @@ function connectMQTT() {
   };
 
   client.connect({
-    timeout: 5,
     useSSL: true,
+    timeout: 5,
 
     onSuccess: () => {
       console.log("✅ Connected");
-      updateStatus("connected");
+      updateStatus("🟢 Connected", true);
     },
 
-    onFailure: () => {
+    onFailure: (err) => {
       console.log("❌ Connect failed:", err.errorMessage);
-      updateStatus("reconnecting");
+      updateStatus("🟠 Reconnecting...", false);
 
       reconnectTimer = setTimeout(() => {
         connectMQTT();
@@ -48,10 +56,20 @@ function connectMQTT() {
   });
 }
 
-// MANUAL CONNECT
-function manualConnect() {
-  isManuallyDisconnected = false;
-  connectMQTT();
+// SEND RELAY COMMAND
+function controlRelay(topic, value) {
+  if (!client || !client.isConnected()) {
+    alert("❌ Not connected. Reconnecting...");
+    connectMQTT();
+    return;
+  }
+
+  const msg = new Paho.MQTT.Message(value.toString());
+  msg.destinationName = topic;
+
+  client.send(msg);
+
+  console.log("📡 Sent:", topic, value);
 }
 
 // MANUAL DISCONNECT
@@ -63,45 +81,12 @@ function manualDisconnect() {
   }
 
   clearTimeout(reconnectTimer);
-  updateStatus("disconnected");
+  updateStatus("🔴 Disconnected", false);
 }
 
-// STATUS HANDLER
-function updateStatus(state) {
-  let status = document.getElementById("status");
-
-  status.classList.remove("connected", "disconnected", "reconnecting");
-
-  if (state === "connected") {
-    status.innerHTML = "🟢 Connected";
-    status.classList.add("connected");
-
-  } else if (state === "connecting") {
-    status.innerHTML = "🔵 Connecting...";
-    status.classList.add("reconnecting");
-
-  } else if (state === "reconnecting") {
-    status.innerHTML = "🟠 Reconnecting...";
-    status.classList.add("reconnecting");
-
-  } else {
-    status.innerHTML = "🔴 Disconnected";
-    status.classList.add("disconnected");
-  }
-}
-
-// RELAY CONTROL
-function controlRelay(topic, value) {
-  if (!client || !client.isConnected()) {
-    alert("❌ Not connected. Reconnecting...");
-    connectMQTT();
-    return;
-  }
-
-  let msg = new Paho.MQTT.Message(value.toString());
-  msg.destinationName = topic;
-
-  client.send(msg);
-
-  console.log("📡 Sent:", topic, value);
+// STATUS UI
+function updateStatus(text, connected) {
+  const statusDiv = document.getElementById("status");
+  statusDiv.innerText = text;
+  statusDiv.className = "status " + (connected ? "connected" : "disconnected");
 }
