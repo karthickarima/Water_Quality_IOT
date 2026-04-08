@@ -12,8 +12,9 @@ function connectMQTT() {
   let port = Number(document.getElementById("port").value);
 
   updateStatus("connecting");
+  let clientId = "web_" + Math.floor(Math.random() * 1000);
+  client = new Paho.MQTT.Client(host, port, "/mqtt", clientId);
 
-  client = new Paho.MQTT.Client(host, port, "web_" + Math.floor(Math.random()*1000));
 
   client.onConnectionLost = function () {
     console.log("❌ Connection lost");
@@ -29,7 +30,7 @@ function connectMQTT() {
 
   client.connect({
     timeout: 5,
-    useSSL: false,
+    useSSL: true,
 
     onSuccess: () => {
       console.log("✅ Connected");
@@ -37,7 +38,7 @@ function connectMQTT() {
     },
 
     onFailure: () => {
-      console.log("❌ Connect failed");
+      console.log("❌ Connect failed:", err.errorMessage);
       updateStatus("reconnecting");
 
       reconnectTimer = setTimeout(() => {
